@@ -1,0 +1,78 @@
+
+trigger : none
+ pool : Default
+  name: myagent
+
+stages:
+++++++++++++++++++++++
+Stage 1: terraform Init
+++++++++++++++++++++++
+  - stage: Terraform_Init
+    displayName: terraform init
+    jobs:
+    - job: Init
+      # pool: 
+      #  vmImage= 'ubuntu'
+      steps: 
+      - task: AzurePowerShell@5
+        inputs:
+          ScriptType: 'InlineScript'
+          Inline: |
+            terraform --version
+            terraform init
+          azurePowerShellVersion: 'LatestVersion'
+
+++++++++++++++++++++++++++
+Stage 2: Terraform Plan
+++++++++++++++++++++++++++++
+- stage: Terraform_Plan
+  displayName: terraform plan
+  jobs:
+   - job: Plan
+    #  pool:
+    #   vmImage:'unbuntu'
+    steps:
+     - task: AzurePowerShell@5
+       inputs:
+         ScriptType: 'InlineScript'
+         Inline: 'terraform plan'
+         errorActionPreference: 'continue'
+         azurePowerShellVersion: 'LatestVersion'
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Stage 3: Tflint+ tfsec
++++++++++++++++++++++++++++++++++++++++++++++
+- stage: Static_Analysis
+  displayName: Terraform Security & Lint
+  dependsOn: Terraform_Plan
+  jobs: 
+  - job: Scan
+    steps:
+     testVersion'
+         displayName: run tflint
+         dependsOn: Terraform plan
+         jobs:
+          -job: scan
+          steps:
+          -step:
+           - task: AzurePowerShell@5
+             inputs:
+               ScriptType: 'InlineScript'
+               Inline: |
+                 curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+                         tflint --init
+                         tflint
+                displayName: run tflint
+                 curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+                         tfsec .
+                displayName: tfsec .
+                
+
+    
+
+
+
+
+
+  
+ 
